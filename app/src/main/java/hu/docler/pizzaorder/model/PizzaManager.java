@@ -1,6 +1,7 @@
 package hu.docler.pizzaorder.model;
 
 import android.content.Context;
+import android.util.LongSparseArray;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -51,7 +52,7 @@ public final class PizzaManager {
     private Context context;
 
     private double basePrice;
-    private Map<Long, Ingredient> ingredientsMap = new HashMap<>();
+    private LongSparseArray<Ingredient> ingredientsMap = new LongSparseArray<>();
     private List<Pizza> pizzas = new ArrayList<>();
 
     public PizzaManager(Context context) {
@@ -64,67 +65,34 @@ public final class PizzaManager {
 
         service.fetchIngredients()
                 .flatMap(new Function<List<Ingredient>, SingleSource<PizzaResponse>>() {
-            @Override
-            public SingleSource<PizzaResponse> apply(List<Ingredient> ingredients) throws Exception {
-                buildIngredientsMap(ingredients);
-                return service.fetchPizzas();
-            }
-        }).doOnSuccess(new Consumer<PizzaResponse>() {
-            @Override
-            public void accept(PizzaResponse pzr) throws Exception {
-                basePrice = pzr.basePrice;
-                pizzas = pzr.pizzas;
+                    @Override
+                    public SingleSource<PizzaResponse> apply(List<Ingredient> ingredients) throws Exception {
+                        buildIngredientsMap(ingredients);
+                        return service.fetchPizzas();
+                    }
+                })
+            .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<PizzaResponse>() {
+                    @Override
+                    public void accept(PizzaResponse pzr) throws Exception {
+                        basePrice = pzr.basePrice;
+                        pizzas = pzr.pizzas;
 
-                for (Pizza p : pizzas) {
-                    p.setPrice(calcPizzaPrice(p));
-                }
+                        for (Pizza p : pizzas) {
+                            p.setPrice(calcPizzaPrice(p));
+                        }
 
-                if (callback != null) {
-                    callback.onCompleted(PizzaManager.this);
-                }
-            }
-        }).doOnError(new Consumer<Throwable>() {
-            @Override
-            public void accept(Throwable throwable) throws Exception {
-                if (callback != null) {
-                    callback.onFailure(throwable);
-                }
-            }
-        }).subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread());
+                        if (callback != null) {
+                            callback.onCompleted(PizzaManager.this);
+                        }
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
 
-//        Single.concat(service.fetchIngredients(), service.fetchPizzas())
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Consumer<Object>() {
-//                    @Override
-//                    public void accept(Object response) throws Exception {
-//                        if (response instanceof PizzaResponse) {
-//                            PizzaResponse pzr = (PizzaResponse) response;
-//                            basePrice = pzr.basePrice;
-//                            pizzas = pzr.pizzas;
-//
-//                            for (Pizza p : pizzas) {
-//                                p.setPrice(calcPizzaPrice(p));
-//                            }
-//                        } else if (response instanceof List<?>) {
-//                            buildIngredientsMap((List<Ingredient>)response);
-//                        }
-//
-//                        if (!ingredientsMap.isEmpty() && !pizzas.isEmpty()) {
-//                            if (callback != null) {
-//                                callback.onCompleted(PizzaManager.this);
-//                            }
-//                        }
-//                    }
-//                }, new Consumer<Throwable>() {
-//                    @Override
-//                    public void accept(Throwable throwable) throws Exception {
-//                        if (callback != null) {
-//                            callback.onFailure(throwable);
-//                        }
-//                    }
-//                });
+                    }
+                });
     }
 
     public void setBasePrice(int basePrice) {
@@ -135,15 +103,25 @@ public final class PizzaManager {
         return basePrice;
     }
 
-    public Pizza createPizza(List<Ingredient> ingredients) {
+    public Pizza createPizza(String name, List<Ingredient> ingredients) {
         Pizza p = new Pizza();
-        p.setIngredients(null);
+        List<Long> ingrints = new ArrayList<>();
+
+        p.setName(name);
+
+        for (Ingredient ing : ingredients) {
+            ingrints.add(ing.getId());
+        }
+        p.setIngredients(ingrints);
+
         return p;
     }
 
     public List<Ingredient> getIngredientsSorted() {
         ArrayList<Ingredient> list = new ArrayList();
-        list.addAll(ingredientsMap.values());
+        for (int i = 0; i < ingredientsMap.size(); i++) {
+            list.add(ingredientsMap.valueAt(i));
+        }
 
         Collections.sort(list, new Comparator<Ingredient>() {
             @Override

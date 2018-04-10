@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">PizzaOrder</string>
+
+    <string name="added_to_cart">%1$s added to cart</string>
 </resources>

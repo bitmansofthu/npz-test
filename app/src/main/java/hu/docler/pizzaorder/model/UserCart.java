@@ -14,6 +14,7 @@ import java.util.List;
 public class UserCart {
 
     public static final String ACTION_CART_UPDATED = "action_cart_updated";
+    public static final String EXTRA_ITEM_NAME = "name";
 
     private static volatile UserCart instance;
 
@@ -37,13 +38,29 @@ public class UserCart {
     public void add(Pizza pizza) {
         pizzas.add(pizza);
 
-        LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ACTION_CART_UPDATED));
+        Intent i = new Intent(ACTION_CART_UPDATED);
+        i.putExtra(EXTRA_ITEM_NAME, pizza.getName());
+        LocalBroadcastManager.getInstance(context).sendBroadcast(i);
     }
 
     public void add(Drink drink) {
         drinks.add(drink);
 
-        LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ACTION_CART_UPDATED));
+        Intent i = new Intent(ACTION_CART_UPDATED);
+        i.putExtra(EXTRA_ITEM_NAME, drink.getName());
+        LocalBroadcastManager.getInstance(context).sendBroadcast(i);
+    }
+
+    public List<Pizza> getPizzas() {
+        return pizzas;
+    }
+
+    public List<Drink> getDrinks() {
+        return drinks;
+    }
+
+    public int getAllItemCount() {
+        return pizzas.size() + drinks.size();
     }
 
     public void clear() {

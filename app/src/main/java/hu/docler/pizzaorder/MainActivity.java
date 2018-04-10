@@ -1,12 +1,22 @@
 package hu.docler.pizzaorder;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -30,11 +40,26 @@ public class MainActivity extends AppCompatActivity {
 
     private PizzaManager pizzaManager;
 
+    private BroadcastReceiver cartUpdatedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Snackbar snackbar = Snackbar.make(findViewById(R.id.home_layout),
+                    getString(R.string.added_to_cart, intent.getStringExtra(UserCart.EXTRA_ITEM_NAME)),
+                    Snackbar.LENGTH_SHORT);
+            snackbar.show();
+
+            invalidateOptionsMenu();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         ButterKnife.bind(this);
 
@@ -49,26 +74,61 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.cart_item_count);
+        item.setActionView(R.layout.action_cart_count);
+        TextView cartCount = (TextView) item.getActionView();
+        cartCount.setText(String.valueOf(UserCart.getInstance(this).getAllItemCount()));
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.show_cart) {
+            showCart();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(cartUpdatedReceiver, new IntentFilter(UserCart.ACTION_CART_UPDATED));
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(cartUpdatedReceiver);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == CreatePizzaActivity.REQUEST_CODE) {
 
-        }
     }
 
     @OnClick(R.id.add_pizza)
     public void addPizza() {
         Intent i = new Intent(this, CreatePizzaActivity.class);
-        startActivityForResult(i, CreatePizzaActivity.REQUEST_CODE);
+        //startActivityForResult(i, CreatePizzaActivity.REQUEST_CODE);
+    }
+
+    public void showCart() {
+        Intent i = new Intent(this, UserCartActivity.class);
+        startActivity(i);
     }
 
     private void updatePizzaList() {
@@ -105,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
 
             holder.title.setText(pizza.getName());
             if (pizza.getImageUrl() != null) {
-                PicassoHelper.downloadInto(pizza.getImageUrl(), holder.image);
+                PicassoHelper.downloadIntoResized(pizza.getImageUrl(), holder.image, R.dimen.home_item_image_size, R.dimen.home_item_image_size);
             }
             holder.addToCart.setText(String.format("%.2f", pizza.getPrice()));
             holder.addToCart.setOnClickListener(new AddToCartClickListener(pizza));

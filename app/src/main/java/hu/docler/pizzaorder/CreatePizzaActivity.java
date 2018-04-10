@@ -11,8 +11,6 @@ import android.support.v7.app.AppCompatActivity;
 
 public class CreatePizzaActivity extends AppCompatActivity {
 
-    public static final int REQUEST_CODE = 1001;
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
         super.onCreate(savedInstanceState, persistentState);

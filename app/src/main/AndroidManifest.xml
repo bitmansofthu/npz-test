@@ -18,7 +18,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".CreatePizzaActivity" />
+        <activity android:name=".UserCartActivity" />
     </application>
 
 </manifest>
