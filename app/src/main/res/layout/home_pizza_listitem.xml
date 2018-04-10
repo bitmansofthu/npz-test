@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/home_item_height"
+    android:background="@drawable/bg_wood">
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/home_item_image_height"
+        android:layout_centerInParent="true"
+        android:scaleType="fitCenter"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/title"
+        android:layout_alignParentBottom="true"
+        android:background="#88000000" />
+
+    <Button
+        android:id="@+id/addtocart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" />
+
+    <TextView
+        android:id="@+id/ingredients"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/addtocart"
+        style="@style/HomePizzaListSubText" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/ingredients"
+        style="@style/HomePizzaListTitle" />
+
+
+
+</RelativeLayout>
