@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
                 PicassoHelper.downloadIntoResized(pizza.getImageUrl(), holder.image, R.dimen.home_item_image_size, R.dimen.home_item_image_size);
             }
             holder.addToCart.setText(Utils.formatCurrency(pizza.getPrice()));
-            holder.addToCart.setOnClickListener(new AddToCartClickListener(pizza));
+            holder.addToCart.setOnClickListener(new UserCart.CartItemAction(pizza, UserCart.CartItemAction.ADD));
         }
 
         @Override
@@ -195,20 +195,6 @@ public class MainActivity extends AppCompatActivity {
             super(v);
 
             ButterKnife.bind(this, v);
-        }
-    }
-
-    class AddToCartClickListener implements View.OnClickListener {
-
-        Pizza pizza;
-
-        public AddToCartClickListener(Pizza p) {
-            pizza = p;
-        }
-
-        @Override
-        public void onClick(View view) {
-            UserCart.getInstance(view.getContext()).add(pizza);
         }
     }
 

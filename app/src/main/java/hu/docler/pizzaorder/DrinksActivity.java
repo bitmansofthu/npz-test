@@ -15,44 +15,36 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import java.util.Currency;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import hu.docler.pizzaorder.model.CartItem;
-import hu.docler.pizzaorder.model.Pizza;
+import hu.docler.pizzaorder.model.DrinkManager;
 import hu.docler.pizzaorder.model.RemoteOperationCallback;
 import hu.docler.pizzaorder.model.UserCart;
-import hu.docler.pizzaorder.util.PicassoHelper;
 import hu.docler.pizzaorder.util.Utils;
 
-public class UserCartActivity extends AppCompatActivity {
+public class DrinksActivity extends AppCompatActivity {
 
     private BroadcastReceiver cartUpdatedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Snackbar snackbar = Snackbar.make(findViewById(R.id.cart_layout),
-                    getString(R.string.removed_from_cart, intent.getStringExtra(UserCart.EXTRA_ITEM_NAME)),
+                    getString(R.string.added_to_cart, intent.getStringExtra(UserCart.EXTRA_ITEM_NAME)),
                     Snackbar.LENGTH_SHORT);
             snackbar.show();
-
-            cartListAdapter.notifyDataSetChanged();
-            updateSum();
         }
     };
 
-    @BindView(R.id.cart_list) RecyclerView cartList;
-    @BindView(R.id.checkout) Button checkoutButton;
+    @BindView(R.id.drinks_list) RecyclerView drinksList;
+
+    private DrinkManager manager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,64 +52,31 @@ public class UserCartActivity extends AppCompatActivity {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(cartUpdatedReceiver, new IntentFilter(UserCart.ACTION_CART_UPDATED));
 
-        setContentView(R.layout.activity_cart);
+        setContentView(R.layout.activity_drinks);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         ButterKnife.bind(this);
 
+        manager = new DrinkManager(this);
+
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this,
                 LinearLayoutManager.VERTICAL);
-        cartList.addItemDecoration(dividerItemDecoration);
-        cartList.setLayoutManager(mLayoutManager);
-        cartList.setItemAnimator(new DefaultItemAnimator());
-        cartList.setAdapter(cartListAdapter);
+        drinksList.addItemDecoration(dividerItemDecoration);
+        drinksList.setLayoutManager(mLayoutManager);
+        drinksList.setItemAnimator(new DefaultItemAnimator());
+        drinksList.setAdapter(drinksListAdapter);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
-        updateSum();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(cartUpdatedReceiver);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.cart_menu, menu);
-
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_drinks) {
-            startActivity(new Intent(this, DrinksActivity.class));
-
-            return true;
-        }
-
-        return false;
-    }
-
-    @OnClick(R.id.checkout)
-    public void checkoutClicked() {
-        UserCart.getInstance(this).send(new RemoteOperationCallback<UserCart>() {
+        manager.download(new RemoteOperationCallback<DrinkManager>() {
             @Override
-            public void onCompleted(UserCart caller) {
+            public void onCompleted(DrinkManager caller) {
 
             }
 
@@ -128,40 +87,48 @@ public class UserCartActivity extends AppCompatActivity {
         });
     }
 
-    private void updateSum() {
-        checkoutButton.setText(getString(R.string.cart_checkout, Utils.formatCurrency(UserCart.getInstance(this).getSumPrice())));
+    @Override
+    protected void onStop() {
+        super.onStop();
     }
 
-    private RecyclerView.Adapter cartListAdapter = new RecyclerView.Adapter<UserCartActivity.ViewHolder>(){
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    private RecyclerView.Adapter drinksListAdapter = new RecyclerView.Adapter<DrinksActivity.ViewHolder>(){
 
         @Override
-        public UserCartActivity.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public DrinksActivity.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.cart_listitem,
                     parent, false);
 
-            return new UserCartActivity.ViewHolder(view);
+            return new DrinksActivity.ViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(UserCartActivity.ViewHolder holder, int position) {
-            List<CartItem> items = UserCart.getInstance(UserCartActivity.this).getItems();
+        public void onBindViewHolder(DrinksActivity.ViewHolder holder, int position) {
+            List<CartItem> items = UserCart.getInstance(DrinksActivity.this).getItems();
 
             CartItem item = items.get(position);
             holder.title.setText(item.getName());
             holder.price.setText(Utils.formatCurrency(item.getPrice()));
-            holder.deleteItem.setOnClickListener(new UserCart.CartItemAction(item, UserCart.CartItemAction.REMOVE));
+            holder.addItem.setOnClickListener(new UserCart.CartItemAction(item, UserCart.CartItemAction.ADD));
         }
 
         @Override
         public int getItemCount() {
-            return UserCart.getInstance(UserCartActivity.this).getItems().size();
+            return UserCart.getInstance(DrinksActivity.this).getItems().size();
         }
     };
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.cart_item_name) TextView title;
+        @BindView(R.id.cart_item_name)
+        TextView title;
         @BindView(R.id.cart_item_price) TextView price;
-        @BindView(R.id.cart_item_delete) ImageButton deleteItem;
+        @BindView(R.id.cart_item_delete)
+        ImageButton addItem;
 
         public ViewHolder(View v) {
             super(v);

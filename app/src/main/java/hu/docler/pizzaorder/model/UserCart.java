@@ -3,6 +3,7 @@ package hu.docler.pizzaorder.model;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,28 @@ public class UserCart {
     public static final String EXTRA_ITEM_NAME = "name";
 
     private static volatile UserCart instance;
+
+    public static class CartItemAction implements View.OnClickListener {
+        public static final int ADD = 1;
+        public static final int REMOVE = -1;
+
+        CartItem item;
+        int operation;
+
+        public CartItemAction(CartItem item, int operation) {
+            this.item = item;
+            this.operation = operation;
+        }
+
+        @Override
+        public void onClick(View view) {
+            if (operation == ADD) {
+                UserCart.getInstance(view.getContext()).add(item);
+            } else if (operation == REMOVE) {
+                UserCart.getInstance(view.getContext()).remove(item);
+            }
+        }
+    }
 
     public static synchronized UserCart getInstance(Context c) {
         if (instance == null) {
