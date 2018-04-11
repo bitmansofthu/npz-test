@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">PizzaOrder</string>
 
+    <string name="cart_checkout">Checkout (%1$s)</string>
     <string name="added_to_cart">%1$s added to cart</string>
+    <string name="removed_from_cart">%1$s removed cart</string>
 </resources>

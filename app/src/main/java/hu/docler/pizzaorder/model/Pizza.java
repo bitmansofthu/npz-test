@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Pizza {
+public class Pizza implements CartItem {
 
     @SerializedName("ingredients")
     @Expose
@@ -28,6 +28,7 @@ public class Pizza {
         this.ingredients = ingredients;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -48,7 +49,8 @@ public class Pizza {
         this.price = price;
     }
 
-    public double getPrice() {
+    @Override
+    public Double getPrice() {
         return price;
     }
 

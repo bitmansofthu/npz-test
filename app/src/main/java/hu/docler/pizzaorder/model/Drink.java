@@ -3,11 +3,11 @@ package hu.docler.pizzaorder.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Drink {
+public class Drink implements CartItem {
 
     @SerializedName("price")
     @Expose
-    private Integer price;
+    private Double price;
     @SerializedName("name")
     @Expose
     private String name;
@@ -15,14 +15,16 @@ public class Drink {
     @Expose
     private Integer id;
 
-    public Integer getPrice() {
+    @Override
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(Integer price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
+    @Override
     public String getName() {
         return name;
     }

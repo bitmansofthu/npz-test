@@ -28,47 +28,49 @@ public class UserCart {
 
     private Context context;
 
-    private List<Pizza> pizzas = new ArrayList<>();
-    private List<Drink> drinks = new ArrayList<>();
+    private List<CartItem> items = new ArrayList<>();
 
     private UserCart(Context context) {
         this.context = context.getApplicationContext();
     }
 
-    public void add(Pizza pizza) {
-        pizzas.add(pizza);
+    public void add(CartItem item) {
+        items.add(item);
 
-        Intent i = new Intent(ACTION_CART_UPDATED);
-        i.putExtra(EXTRA_ITEM_NAME, pizza.getName());
-        LocalBroadcastManager.getInstance(context).sendBroadcast(i);
+        notifyChanged(item);
     }
 
-    public void add(Drink drink) {
-        drinks.add(drink);
+    public void remove(CartItem item) {
+        items.remove(item);
 
-        Intent i = new Intent(ACTION_CART_UPDATED);
-        i.putExtra(EXTRA_ITEM_NAME, drink.getName());
-        LocalBroadcastManager.getInstance(context).sendBroadcast(i);
+        notifyChanged(item);
     }
 
-    public List<Pizza> getPizzas() {
-        return pizzas;
+    public List<CartItem> getItems() {
+        return items;
     }
 
-    public List<Drink> getDrinks() {
-        return drinks;
-    }
+    public double getSumPrice() {
+        double sum = 0;
 
-    public int getAllItemCount() {
-        return pizzas.size() + drinks.size();
+        for (CartItem item : items) {
+            sum += item.getPrice();
+        }
+
+        return sum;
     }
 
     public void clear() {
-        pizzas.clear();
-        drinks.clear();
+        items.clear();
     }
 
     public void send(RemoteOperationCallback<UserCart> callback) {
 
+    }
+
+    private void notifyChanged(CartItem item) {
+        Intent i = new Intent(ACTION_CART_UPDATED);
+        i.putExtra(EXTRA_ITEM_NAME, item.getName());
+        LocalBroadcastManager.getInstance(context).sendBroadcast(i);
     }
 }

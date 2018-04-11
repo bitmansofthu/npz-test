@@ -33,6 +33,7 @@ import hu.docler.pizzaorder.model.Pizza;
 import hu.docler.pizzaorder.model.PizzaManager;
 import hu.docler.pizzaorder.model.RemoteOperationCallback;
 import hu.docler.pizzaorder.model.UserCart;
+import hu.docler.pizzaorder.util.Utils;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -55,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(cartUpdatedReceiver, new IntentFilter(UserCart.ACTION_CART_UPDATED));
 
         setContentView(R.layout.activity_main);
 
@@ -85,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         MenuItem item = menu.findItem(R.id.cart_item_count);
         item.setActionView(R.layout.action_cart_count);
         TextView cartCount = (TextView) item.getActionView();
-        cartCount.setText(String.valueOf(UserCart.getInstance(this).getAllItemCount()));
+        cartCount.setText(String.valueOf(UserCart.getInstance(this).getItems().size()));
 
         return super.onPrepareOptionsMenu(menu);
     }
@@ -105,12 +108,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(cartUpdatedReceiver, new IntentFilter(UserCart.ACTION_CART_UPDATED));
+        invalidateOptionsMenu();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
 
         LocalBroadcastManager.getInstance(this).unregisterReceiver(cartUpdatedReceiver);
     }
@@ -167,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
             if (pizza.getImageUrl() != null) {
                 PicassoHelper.downloadIntoResized(pizza.getImageUrl(), holder.image, R.dimen.home_item_image_size, R.dimen.home_item_image_size);
             }
-            holder.addToCart.setText(String.format("%.2f", pizza.getPrice()));
+            holder.addToCart.setText(Utils.formatCurrency(pizza.getPrice()));
             holder.addToCart.setOnClickListener(new AddToCartClickListener(pizza));
         }
 
