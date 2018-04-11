@@ -2,14 +2,13 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/cart_item_height"
-    android:paddingLeft="5dp"
-    android:paddingRight="5dp">
+    android:padding="5dp">
 
     <TextView
         android:id="@+id/cart_item_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"/>
+        android:textStyle="bold"/>
 
     <ImageButton
         android:id="@+id/cart_item_delete"
@@ -24,8 +23,6 @@
         android:id="@+id/cart_item_price"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@id/cart_item_delete"
-        android:layout_marginRight="5dp"
-        android:layout_centerVertical="true" />
+        android:layout_alignParentBottom="true" />
 
 </RelativeLayout>
