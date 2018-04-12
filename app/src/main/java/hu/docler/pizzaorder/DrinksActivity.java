@@ -14,20 +14,20 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import hu.docler.pizzaorder.model.CartItem;
+import hu.docler.pizzaorder.model.Drink;
 import hu.docler.pizzaorder.model.DrinkManager;
 import hu.docler.pizzaorder.model.RemoteOperationCallback;
 import hu.docler.pizzaorder.model.UserCart;
+import hu.docler.pizzaorder.util.StatusLine;
 import hu.docler.pizzaorder.util.Utils;
 
 public class DrinksActivity extends AppCompatActivity {
@@ -35,7 +35,7 @@ public class DrinksActivity extends AppCompatActivity {
     private BroadcastReceiver cartUpdatedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Snackbar snackbar = Snackbar.make(findViewById(R.id.cart_layout),
+            Snackbar snackbar = Snackbar.make(findViewById(R.id.drinks_layout),
                     getString(R.string.added_to_cart, intent.getStringExtra(UserCart.EXTRA_ITEM_NAME)),
                     Snackbar.LENGTH_SHORT);
             snackbar.show();
@@ -45,6 +45,8 @@ public class DrinksActivity extends AppCompatActivity {
     @BindView(R.id.drinks_list) RecyclerView drinksList;
 
     private DrinkManager manager;
+
+    private StatusLine status;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,6 +58,8 @@ public class DrinksActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        status = new StatusLine((TextView) findViewById(R.id.status));
 
         ButterKnife.bind(this);
 
@@ -74,15 +78,21 @@ public class DrinksActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+        status.show(getString(R.string.status_loading), getResources().getColor(R.color.statusGreen));
+
         manager.download(new RemoteOperationCallback<DrinkManager>() {
             @Override
             public void onCompleted(DrinkManager caller) {
+                status.hide();
 
+                drinksListAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onFailure(Throwable t) {
+                status.show(getString(R.string.status_error), getResources().getColor(R.color.statusRed));
 
+                Log.w(DrinksActivity.class.getSimpleName(), "Failed to retrieve", t);
             }
         });
     }
@@ -101,7 +111,7 @@ public class DrinksActivity extends AppCompatActivity {
 
         @Override
         public DrinksActivity.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.cart_listitem,
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.drink_listitem,
                     parent, false);
 
             return new DrinksActivity.ViewHolder(view);
@@ -109,26 +119,23 @@ public class DrinksActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(DrinksActivity.ViewHolder holder, int position) {
-            List<CartItem> items = UserCart.getInstance(DrinksActivity.this).getItems();
+            Drink drink = manager.getDrinks().get(position);
 
-            CartItem item = items.get(position);
-            holder.title.setText(item.getName());
-            holder.price.setText(Utils.formatCurrency(item.getPrice()));
-            holder.addItem.setOnClickListener(new UserCart.CartItemAction(item, UserCart.CartItemAction.ADD));
+            holder.title.setText(drink.getName());
+            holder.price.setText(Utils.formatCurrency(drink.getPrice()));
+            holder.addItem.setOnClickListener(new UserCart.CartItemAction(drink, UserCart.CartItemAction.ADD));
         }
 
         @Override
         public int getItemCount() {
-            return UserCart.getInstance(DrinksActivity.this).getItems().size();
+            return manager.getDrinks().size();
         }
     };
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.cart_item_name)
-        TextView title;
-        @BindView(R.id.cart_item_price) TextView price;
-        @BindView(R.id.cart_item_delete)
-        ImageButton addItem;
+        @BindView(R.id.drink_item_name) TextView title;
+        @BindView(R.id.drink_item_price) TextView price;
+        @BindView(R.id.drink_item_add) ImageButton addItem;
 
         public ViewHolder(View v) {
             super(v);

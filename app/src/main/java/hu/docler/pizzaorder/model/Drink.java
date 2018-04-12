@@ -13,7 +13,7 @@ public class Drink implements CartItem {
     private String name;
     @SerializedName("id")
     @Expose
-    private Integer id;
+    private Long id;
 
     @Override
     public Double getPrice() {
@@ -33,11 +33,11 @@ public class Drink implements CartItem {
         this.name = name;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -1,9 +1,7 @@
 package hu.docler.pizzaorder.util;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.net.Uri;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.ImageView;
 

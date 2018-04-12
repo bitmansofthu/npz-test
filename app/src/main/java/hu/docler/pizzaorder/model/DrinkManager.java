@@ -3,6 +3,7 @@ package hu.docler.pizzaorder.model;
 
 import android.content.Context;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import hu.docler.pizzaorder.util.RetrofitFactory;
@@ -26,7 +27,7 @@ public class DrinkManager {
 
     private Context context;
 
-    private List<Drink> drinks;
+    private List<Drink> drinks = new ArrayList<>();
 
     public DrinkManager(Context context) {
         this.context = context;

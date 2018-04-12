@@ -4,18 +4,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,16 +22,15 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.io.Serializable;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import hu.docler.pizzaorder.util.PicassoHelper;
 import hu.docler.pizzaorder.model.Pizza;
 import hu.docler.pizzaorder.model.PizzaManager;
 import hu.docler.pizzaorder.model.RemoteOperationCallback;
 import hu.docler.pizzaorder.model.UserCart;
+import hu.docler.pizzaorder.util.PicassoHelper;
+import hu.docler.pizzaorder.util.StatusLine;
 import hu.docler.pizzaorder.util.Utils;
 
 public class MainActivity extends AppCompatActivity {
@@ -40,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.pizza_list) RecyclerView pizzaList;
 
     private PizzaManager pizzaManager;
+
+    private StatusLine status;
 
     private BroadcastReceiver cartUpdatedReceiver = new BroadcastReceiver() {
         @Override
@@ -60,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(cartUpdatedReceiver, new IntentFilter(UserCart.ACTION_CART_UPDATED));
 
         setContentView(R.layout.activity_main);
+
+        status = new StatusLine((TextView) findViewById(R.id.status));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -144,15 +146,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetch() {
+        status.show(getString(R.string.status_loading), R.color.statusGreen);
+
         pizzaManager.download(new RemoteOperationCallback<PizzaManager>() {
             @Override
             public void onCompleted(PizzaManager manager) {
+                status.hide();
+
                 updatePizzaList();
             }
 
             @Override
             public void onFailure(Throwable t) {
-                // TODO show alert
+                status.show(getString(R.string.status_error), R.color.statusRed);
+
+                Log.w(MainActivity.class.getSimpleName(), "Failed to retrieve infos", t);
             }
         });
     }

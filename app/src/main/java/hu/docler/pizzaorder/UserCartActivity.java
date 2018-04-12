@@ -23,17 +23,14 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import java.util.Currency;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import hu.docler.pizzaorder.model.CartItem;
-import hu.docler.pizzaorder.model.Pizza;
 import hu.docler.pizzaorder.model.RemoteOperationCallback;
 import hu.docler.pizzaorder.model.UserCart;
-import hu.docler.pizzaorder.util.PicassoHelper;
 import hu.docler.pizzaorder.util.Utils;
 
 public class UserCartActivity extends AppCompatActivity {
@@ -80,6 +77,7 @@ public class UserCartActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+        cartListAdapter.notifyDataSetChanged();
         updateSum();
     }
 

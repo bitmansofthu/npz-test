@@ -3,16 +3,43 @@ package hu.docler.pizzaorder.model;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.View;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import hu.docler.pizzaorder.util.RetrofitFactory;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.http.Body;
+import retrofit2.http.POST;
 
 /**
  * Created by aquajava on 2018. 03. 31..
  */
 
 public class UserCart {
+
+    class CartRequest {
+        @SerializedName("pizzas")
+        @Expose
+        List<Pizza> pizzas;
+
+        @SerializedName("drinks")
+        @Expose
+        List<Long> drinks;
+    }
+
+    interface CartService {
+        @POST("post")
+        Call<String> post(@Body CartRequest body);
+    }
 
     public static final String ACTION_CART_UPDATED = "action_cart_updated";
     public static final String EXTRA_ITEM_NAME = "name";
@@ -88,7 +115,42 @@ public class UserCart {
     }
 
     public void send(RemoteOperationCallback<UserCart> callback) {
+        Retrofit retrofit = RetrofitFactory.create(context, "http://httpbin.org/");
+        final CartService service = retrofit.create(CartService.class);
 
+        CartRequest req = createRequest();
+
+        service.post(req).enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                // TODO alert
+
+                Log.d(UserCart.class.getSimpleName(), "Cart response: " + response.body());
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                // TODO alert
+
+                Log.w(UserCart.class.getSimpleName(), "Failed to send cart", t);
+            }
+        });
+    }
+
+    private CartRequest createRequest() {
+        CartRequest req = new CartRequest();
+        req.pizzas = new ArrayList<>();
+        req.drinks = new ArrayList<>();
+
+        for (CartItem item : items) {
+            if (item instanceof Pizza) {
+                req.pizzas.add((Pizza)item);
+            } else if (item instanceof Drink) {
+                req.drinks.add(((Drink) item).getId());
+            }
+        }
+
+        return req;
     }
 
     private void notifyChanged(CartItem item) {

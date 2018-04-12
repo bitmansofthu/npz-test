@@ -32,13 +32,17 @@ public class RetrofitFactory {
 
     public static final String BASE_URL = "https://api.myjson.com/";
 
-    public static Retrofit create(Context context) {
+    public static Retrofit create(Context context, String url) {
         return new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(url)
                 .client(cachingHttpClient(context))
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
+    }
+
+    public static Retrofit create(Context context) {
+        return create(context, BASE_URL);
     }
 
     private static OkHttpClient cachingHttpClient(Context context) {
