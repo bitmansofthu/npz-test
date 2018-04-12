@@ -7,4 +7,13 @@
 
     <string name="status_loading">Loading...</string>
     <string name="status_error">Failed to retrieve data</string>
+
+    <string name="cart_checkout_success">Checkout succeed!</string>
+    <string name="cart_checkout_failed">Checkout has failed!</string>
+
+    <string name="title_home">Pizza Order</string>
+    <string name="title_drinks">Drinks</string>
+    <string name="title_cart">Cart</string>
+
+    <string name="cart_empty">The cart is empty</string>
 </resources>

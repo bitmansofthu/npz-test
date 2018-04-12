@@ -3,6 +3,7 @@ package hu.docler.pizzaorder.model;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hu.docler.pizzaorder.util.RetrofitFactory;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -29,16 +31,16 @@ public class UserCart {
     class CartRequest {
         @SerializedName("pizzas")
         @Expose
-        List<Pizza> pizzas;
+        List<Pizza> pizzas = new ArrayList<>();
 
         @SerializedName("drinks")
         @Expose
-        List<Long> drinks;
+        List<Long> drinks = new ArrayList<>();
     }
 
     interface CartService {
         @POST("post")
-        Call<String> post(@Body CartRequest body);
+        Call<ResponseBody> post(@Body CartRequest body);
     }
 
     public static final String ACTION_CART_UPDATED = "action_cart_updated";
@@ -114,23 +116,35 @@ public class UserCart {
         items.clear();
     }
 
-    public void send(RemoteOperationCallback<UserCart> callback) {
+    public void send(final RemoteOperationCallback<String> callback) {
         Retrofit retrofit = RetrofitFactory.create(context, "http://httpbin.org/");
         final CartService service = retrofit.create(CartService.class);
 
         CartRequest req = createRequest();
 
-        service.post(req).enqueue(new Callback<String>() {
+        service.post(req).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
-                // TODO alert
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                String resp = null;
 
-                Log.d(UserCart.class.getSimpleName(), "Cart response: " + response.body());
+                try {
+                    resp = response.body().string();
+                } catch (Exception e) {
+
+                }
+
+                if (callback != null) {
+                    callback.onCompleted(resp);
+                }
+
+                Log.d(UserCart.class.getSimpleName(), "Cart response: " + resp);
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
-                // TODO alert
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                if (callback != null) {
+                    callback.onFailure(t);
+                }
 
                 Log.w(UserCart.class.getSimpleName(), "Failed to send cart", t);
             }
@@ -139,8 +153,6 @@ public class UserCart {
 
     private CartRequest createRequest() {
         CartRequest req = new CartRequest();
-        req.pizzas = new ArrayList<>();
-        req.drinks = new ArrayList<>();
 
         for (CartItem item : items) {
             if (item instanceof Pizza) {

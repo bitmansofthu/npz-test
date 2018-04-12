@@ -32,4 +32,14 @@
         android:layout_above="@id/checkout"
         android:scrollbars="vertical" />
 
+    <TextView
+        android:id="@+id/cart_empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"
+        android:layout_above="@id/checkout"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:text="@string/cart_empty"/>
+
 </RelativeLayout>

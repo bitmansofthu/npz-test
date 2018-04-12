@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
@@ -44,12 +45,13 @@ public class UserCartActivity extends AppCompatActivity {
             snackbar.show();
 
             cartListAdapter.notifyDataSetChanged();
-            updateSum();
+            updateCart();
         }
     };
 
     @BindView(R.id.cart_list) RecyclerView cartList;
     @BindView(R.id.checkout) Button checkoutButton;
+    @BindView(R.id.cart_empty) TextView cartEmpty;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,6 +63,7 @@ public class UserCartActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(R.string.title_cart);
 
         ButterKnife.bind(this);
 
@@ -78,7 +81,7 @@ public class UserCartActivity extends AppCompatActivity {
         super.onStart();
 
         cartListAdapter.notifyDataSetChanged();
-        updateSum();
+        updateCart();
     }
 
     @Override
@@ -113,21 +116,37 @@ public class UserCartActivity extends AppCompatActivity {
 
     @OnClick(R.id.checkout)
     public void checkoutClicked() {
-        UserCart.getInstance(this).send(new RemoteOperationCallback<UserCart>() {
+        UserCart.getInstance(this).send(new RemoteOperationCallback<String>() {
             @Override
-            public void onCompleted(UserCart caller) {
+            public void onCompleted(String response) {
+                new AlertDialog.Builder(UserCartActivity.this)
+                    .setMessage(R.string.cart_checkout_success)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show();
 
+                UserCart.getInstance(UserCartActivity.this).clear();
+                cartListAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onFailure(Throwable t) {
+                new AlertDialog.Builder(UserCartActivity.this)
+                        .setMessage(R.string.cart_checkout_failed)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show();
 
             }
         });
     }
 
-    private void updateSum() {
+    private void updateCart() {
         checkoutButton.setText(getString(R.string.cart_checkout, Utils.formatCurrency(UserCart.getInstance(this).getSumPrice())));
+
+        if (!UserCart.getInstance(this).getItems().isEmpty()) {
+            cartEmpty.setVisibility(View.GONE);
+        } else {
+            cartEmpty.setVisibility(View.VISIBLE);
+        }
     }
 
     private RecyclerView.Adapter cartListAdapter = new RecyclerView.Adapter<UserCartActivity.ViewHolder>(){

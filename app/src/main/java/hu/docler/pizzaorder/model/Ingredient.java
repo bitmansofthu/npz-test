@@ -59,4 +59,9 @@ public class Ingredient implements Serializable {
     public int hashCode() {
         return id.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

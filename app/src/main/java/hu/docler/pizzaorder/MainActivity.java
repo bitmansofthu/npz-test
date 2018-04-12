@@ -12,6 +12,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,6 +26,7 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import hu.docler.pizzaorder.model.Ingredient;
 import hu.docler.pizzaorder.model.Pizza;
 import hu.docler.pizzaorder.model.PizzaManager;
 import hu.docler.pizzaorder.model.RemoteOperationCallback;
@@ -65,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(R.string.title_home);
 
         ButterKnife.bind(this);
 
@@ -183,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
             if (pizza.getImageUrl() != null) {
                 PicassoHelper.downloadIntoResized(pizza.getImageUrl(), holder.image, R.dimen.home_item_image_size, R.dimen.home_item_image_size);
             }
+            holder.ingedients.setText(TextUtils.join(", ", pizzaManager.getPizzaIngredients(pizza).toArray(new Ingredient[]{})));
             holder.addToCart.setText(Utils.formatCurrency(pizza.getPrice()));
             holder.addToCart.setOnClickListener(new UserCart.CartItemAction(pizza, UserCart.CartItemAction.ADD));
         }

@@ -58,6 +58,7 @@ public class DrinksActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(R.string.title_drinks);
 
         status = new StatusLine((TextView) findViewById(R.id.status));
 
