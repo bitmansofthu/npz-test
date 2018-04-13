@@ -23,7 +23,6 @@
         android:background="@android:color/holo_red_light"
         android:text="@string/cart_checkout" />
 
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/cart_list"
         android:layout_width="match_parent"
@@ -41,5 +40,13 @@
         android:gravity="center"
         android:textStyle="bold"
         android:text="@string/cart_empty"/>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:indeterminate="true"
+        android:visibility="gone"/>
 
 </RelativeLayout>

@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.List;
@@ -44,7 +45,6 @@ public class UserCartActivity extends AppCompatActivity {
                     Snackbar.LENGTH_SHORT);
             snackbar.show();
 
-            cartListAdapter.notifyDataSetChanged();
             updateCart();
         }
     };
@@ -52,6 +52,7 @@ public class UserCartActivity extends AppCompatActivity {
     @BindView(R.id.cart_list) RecyclerView cartList;
     @BindView(R.id.checkout) Button checkoutButton;
     @BindView(R.id.cart_empty) TextView cartEmpty;
+    @BindView(R.id.progress_bar) ProgressBar progressBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -116,25 +117,33 @@ public class UserCartActivity extends AppCompatActivity {
 
     @OnClick(R.id.checkout)
     public void checkoutClicked() {
+        progressBar.setVisibility(View.VISIBLE);
+        cartList.setVisibility(View.GONE);
+
         UserCart.getInstance(this).send(new RemoteOperationCallback<String>() {
             @Override
             public void onCompleted(String response) {
+                progressBar.setVisibility(View.GONE);
+                cartList.setVisibility(View.VISIBLE);
+
                 new AlertDialog.Builder(UserCartActivity.this)
                     .setMessage(R.string.cart_checkout_success)
                         .setPositiveButton(android.R.string.ok, null)
                         .show();
 
                 UserCart.getInstance(UserCartActivity.this).clear();
-                cartListAdapter.notifyDataSetChanged();
+                updateCart();
             }
 
             @Override
             public void onFailure(Throwable t) {
+                progressBar.setVisibility(View.GONE);
+                cartList.setVisibility(View.VISIBLE);
+
                 new AlertDialog.Builder(UserCartActivity.this)
                         .setMessage(R.string.cart_checkout_failed)
                         .setPositiveButton(android.R.string.ok, null)
                         .show();
-
             }
         });
     }
@@ -147,6 +156,8 @@ public class UserCartActivity extends AppCompatActivity {
         } else {
             cartEmpty.setVisibility(View.VISIBLE);
         }
+
+        cartListAdapter.notifyDataSetChanged();
     }
 
     private RecyclerView.Adapter cartListAdapter = new RecyclerView.Adapter<UserCartActivity.ViewHolder>(){
