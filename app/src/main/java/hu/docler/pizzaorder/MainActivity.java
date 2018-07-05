@@ -92,15 +92,26 @@ public class MainActivity extends AppCompatActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem item = menu.findItem(R.id.cart_item_count);
         item.setActionView(R.layout.action_cart_count);
-        TextView cartCount = (TextView) item.getActionView();
-        cartCount.setText(String.valueOf(UserCart.getInstance(this).getItems().size()));
+
+        View cartItem = item.getActionView();
+        TextView cartCount = (TextView) cartItem.findViewById(R.id.cart_count);
+
+        int itemCount = UserCart.getInstance(this).getItems().size();
+        if (itemCount > 0)
+            cartCount.setText(String.valueOf(itemCount));
+        else
+            cartCount.setVisibility(View.INVISIBLE);
+
+        cartItem.setOnClickListener(view -> {
+            showCart();
+        });
 
         return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.show_cart) {
+        if (item.getItemId() == R.id.cart_item_count) {
             showCart();
 
             return true;
@@ -149,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetch() {
-        status.show(getString(R.string.status_loading), R.color.statusGreen);
+        status.show(getString(R.string.status_loading), getResources().getColor(R.color.statusGreen));
 
         pizzaManager.download(new RemoteOperationCallback<PizzaManager>() {
             @Override
@@ -161,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Throwable t) {
-                status.show(getString(R.string.status_error), R.color.statusRed);
+                status.show(getString(R.string.status_error), getResources().getColor(R.color.statusRed));
 
                 Log.w(MainActivity.class.getSimpleName(), "Failed to retrieve infos", t);
             }

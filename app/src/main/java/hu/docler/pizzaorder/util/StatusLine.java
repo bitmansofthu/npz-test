@@ -11,9 +11,9 @@ public class StatusLine {
         this.textView = textView;
     }
 
-    public void show(String text, int colorRes) {
+    public void show(String text, int color) {
         textView.setText(text);
-        textView.setBackgroundColor(colorRes);
+        textView.setBackgroundColor(color);
 
         textView.setVisibility(View.VISIBLE);
     }

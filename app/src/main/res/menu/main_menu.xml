@@ -8,10 +8,4 @@
         app:showAsAction="always"
         tools:ignore="MenuTitle" />
 
-    <item
-        android:id="@+id/show_cart"
-        android:icon="@drawable/cart"
-        app:showAsAction="always"
-        tools:ignore="MenuTitle" />
-
 </menu>
