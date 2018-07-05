@@ -60,33 +60,26 @@ public final class PizzaManager {
         final PizzaManagerService service = retrofit.create(PizzaManagerService.class);
 
         service.fetchIngredients()
-                .flatMap(new Function<List<Ingredient>, SingleSource<PizzaResponse>>() {
-                    @Override
-                    public SingleSource<PizzaResponse> apply(List<Ingredient> ingredients) throws Exception {
-                        buildIngredientsMap(ingredients);
-                        return service.fetchPizzas();
-                    }
+                .flatMap(ingredients ->  {
+                    buildIngredientsMap(ingredients);
+                    return service.fetchPizzas();
                 })
             .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<PizzaResponse>() {
-                    @Override
-                    public void accept(PizzaResponse pzr) throws Exception {
-                        basePrice = pzr.basePrice;
-                        pizzas = pzr.pizzas;
+                .subscribe(pzr -> {
+                    basePrice = pzr.basePrice;
+                    pizzas = pzr.pizzas;
 
-                        for (Pizza p : pizzas) {
-                            p.setPrice(calcPizzaPrice(p));
-                        }
-
-                        if (callback != null) {
-                            callback.onCompleted(PizzaManager.this);
-                        }
+                    for (Pizza p : pizzas) {
+                        p.setPrice(calcPizzaPrice(p));
                     }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
 
+                    if (callback != null) {
+                        callback.onCompleted(PizzaManager.this);
+                    }
+                }, throwable ->  {
+                    if (callback != null) {
+                        callback.onFailure(throwable);
                     }
                 });
     }

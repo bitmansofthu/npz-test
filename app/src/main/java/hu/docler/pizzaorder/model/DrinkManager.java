@@ -40,21 +40,15 @@ public class DrinkManager {
         service.fetchDrinks()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<List<Drink>>() {
-                    @Override
-                    public void accept(List<Drink> list) throws Exception {
-                        setDrinks(list);
+                .subscribe(list -> {
+                    setDrinks(list);
 
-                        if (callback != null) {
-                            callback.onCompleted(DrinkManager.this);
-                        }
+                    if (callback != null) {
+                        callback.onCompleted(DrinkManager.this);
                     }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        if (callback != null) {
-                            callback.onFailure(throwable);
-                        }
+                }, throwable ->  {
+                    if (callback != null) {
+                        callback.onFailure(throwable);
                     }
                 });
     }
