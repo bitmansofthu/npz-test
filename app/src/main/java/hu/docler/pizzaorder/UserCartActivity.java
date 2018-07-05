@@ -153,8 +153,10 @@ public class UserCartActivity extends AppCompatActivity {
 
         if (!UserCart.getInstance(this).getItems().isEmpty()) {
             cartEmpty.setVisibility(View.GONE);
+            checkoutButton.setEnabled(true);
         } else {
             cartEmpty.setVisibility(View.VISIBLE);
+            checkoutButton.setEnabled(false);
         }
 
         cartListAdapter.notifyDataSetChanged();
