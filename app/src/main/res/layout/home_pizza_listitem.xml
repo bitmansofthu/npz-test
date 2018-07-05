@@ -21,20 +21,30 @@
     <Button
         android:id="@+id/addtocart"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true" />
+        android:layout_height="25dp"
+        android:layout_alignParentBottom="true"
+        android:paddingLeft="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginBottom="2dp"
+        android:background="@drawable/addtocart_button_backg"
+        android:drawableLeft="@drawable/cart_small"
+        android:drawablePadding="3dp"/>
 
     <TextView
         android:id="@+id/ingredients"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@id/addtocart"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
         style="@style/HomePizzaListSubText" />
 
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
         android:layout_above="@id/ingredients"
         style="@style/HomePizzaListTitle" />
 
