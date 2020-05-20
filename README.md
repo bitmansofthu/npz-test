@@ -7,4 +7,5 @@ Pizza Order application where menu is downloaded from remote source, and selecte
 add DI<br>
 use Fragments<br>
 add ViewModel (separate logic from View)<br>
-add Repositories
+add Repositories<br>
+add unit/UI tests
